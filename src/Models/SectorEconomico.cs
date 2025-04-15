@@ -1,4 +1,4 @@
-namespace PBImpact.Models
+namespace PIBImpact.Models
 {
     public class SectorEconomico
     {
