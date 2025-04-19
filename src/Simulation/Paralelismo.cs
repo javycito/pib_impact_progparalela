@@ -23,7 +23,7 @@ class Program
     {
         string rutaArchivo = "C:\\Users\\souls\\Desktop\\ITLA C6\\Programacion paralela\\datos.csv";
         int tamañoBloque = 100;
-        var resultados = new List<ResultadoSimulacion>(); // Lista antes de utilizar el concurrentbag (NO ES SEGURO)
+        var resultados = new ConcurrentBag<ResultadoSimulacion>();
         var reloj = Stopwatch.StartNew();
 
         using (var lector = new StreamReader(rutaArchivo))
