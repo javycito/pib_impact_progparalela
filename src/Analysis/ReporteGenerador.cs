@@ -44,8 +44,6 @@ namespace PIBImpact.analysis
                 // Sección global
                 csv.WriteField("=====");
                 csv.WriteField("Resultado Global");
-                csv.WriteField("Metrica");
-                csv.WriteField("Valor");
                 csv.NextRecord();
 
                 csv.WriteField("PIB Total Afectado");
