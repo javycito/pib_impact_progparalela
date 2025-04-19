@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PBImpact.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+93285ab1f1d54e8456dcf473a44fc08874b34f78")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+665e6255ffaa6d38e844b19cfb35181fa39ae911")]
 [assembly: System.Reflection.AssemblyProductAttribute("PBImpact.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PBImpact.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
