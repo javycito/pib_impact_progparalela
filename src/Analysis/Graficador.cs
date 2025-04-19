@@ -31,9 +31,61 @@ namespace PIBImpact.analysis
             plt.SaveFig(rutaArchivo);
             Console.WriteLine($" Grafica de tiempos guardada en: {Path.GetFullPath(rutaArchivo)}");
         }
+        public static void GraficarImpactoPIBPorPais(Dictionary<string, Dictionary<string, double>> impactoPorPais)
+{
+    // Ruta base de la carpeta "por_pais"
+    string rutaBase = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "metrics", "por_pais");
+
+    // Asegurarse de que la carpeta exista
+    if (!Directory.Exists(rutaBase))
+        Directory.CreateDirectory(rutaBase);
+
+    foreach (var paisKvp in impactoPorPais)
+    {
+        string pais = paisKvp.Key.Trim();
+        Dictionary<string, double> impactoPorSector = paisKvp.Value;
+
+        // Validar datos
+        if (impactoPorSector.Count == 0)
+            continue;
+
+        string[] sectores = new string[impactoPorSector.Count];
+        double[] valores = new double[impactoPorSector.Count];
+        int i = 0;
+
+        foreach (var kvp in impactoPorSector)
+        {
+            sectores[i] = kvp.Key;
+            valores[i] = kvp.Value;
+            i++;
+        }
+
+        var plt = new ScottPlot.Plot(800, 500);
+        plt.AddBar(valores);
+        plt.XTicks(sectores);
+        plt.Title($"Impacto del PIB por Sector - {pais}");
+        plt.YLabel("PIB Afectado");
+        plt.SetAxisLimits(yMin: 0);
+
+        // Limpiar nombre del archivo
+        string nombreLimpio = string.Concat(pais.Where(c => !Path.GetInvalidFileNameChars().Contains(c))).Replace(" ", "_");
+
+        string rutaArchivo = Path.Combine(rutaBase, $"grafica_pib_{nombreLimpio}.png");
+
+        try
+        {
+            plt.SaveFig(rutaArchivo);
+            Console.WriteLine($"Grafica guardada para {pais} en: {Path.GetFullPath(rutaArchivo)}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($" Error al guardar la grafica para {pais}: {ex.Message}");
+        }
 
         
             
         }
 
+        }
     }
+}
