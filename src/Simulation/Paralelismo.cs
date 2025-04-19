@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 class ResultadoSimulacion
@@ -23,25 +24,26 @@ class Program
     {
         string rutaArchivo = "C:\\Users\\souls\\Desktop\\ITLA C6\\Programacion paralela\\datos.csv";
         int tamañoBloque = 100;
+
+        int cantidadEsperada = ContarLineasValidas(rutaArchivo);
         var resultados = new ConcurrentBag<ResultadoSimulacion>();
+
         var reloj = Stopwatch.StartNew();
 
         using (var lector = new StreamReader(rutaArchivo))
         {
-            string encabezado = lector.ReadLine(); // Leer y descartar el encabezado (primera línea)
+            string encabezado = lector.ReadLine(); // Saltar encabezado
 
             List<string> bloque = new List<string>();
 
             while (!lector.EndOfStream)
             {
-
-                // Validacion para saber el estado de las lineas
                 for (int i = 0; i < tamañoBloque && !lector.EndOfStream; i++)
                 {
                     string linea = lector.ReadLine();
                     if (!string.IsNullOrWhiteSpace(linea))
                     {
-                        bloque.Add(linea); // Añade línea al bloque actual
+                        bloque.Add(linea);
                     }
                 }
 
@@ -58,14 +60,16 @@ class Program
 
                             double pibAjustado = pib * (1 - tasa);
 
-                            //  Esto no es seguro en paralelismo, solo para demostración
-                            resultados.Add(new ResultadoSimulacion
+                            lock (resultados)
                             {
-                                Pais = pais,
-                                PIBOriginal = pib,
-                                TasaArancel = tasa,
-                                PIBAjustado = pibAjustado
-                            });
+                                resultados.Add(new ResultadoSimulacion
+                                {
+                                    Pais = pais,
+                                    PIBOriginal = pib,
+                                    TasaArancel = tasa,
+                                    PIBAjustado = pibAjustado
+                                });
+                            }
                         }
                         catch
                         {
@@ -74,21 +78,69 @@ class Program
                     }
                 });
 
-                bloque.Clear(); // Limpiar bloque para el siguiente grupo de líneas
+                bloque.Clear();
             }
         }
 
         reloj.Stop();
 
-        Console.WriteLine("=== RESULTADOS ===");
+        Console.WriteLine("------- RESULTADOS -------");
         foreach (var resultado in resultados)
         {
             Console.WriteLine(resultado);
         }
 
-        Console.WriteLine("\n=== MÉTRICAS ===");
+        Console.WriteLine("------- ESTADISTICAS -------");
         Console.WriteLine($"Líneas procesadas: {resultados.Count}");
         Console.WriteLine($"Tiempo total: {reloj.ElapsedMilliseconds} ms");
-        Console.WriteLine($"Memoria usada: {GC.GetTotalMemory(false) / 1024.0:F2} KB");
+
+        // PROBANDO LOS RESULTADOS / VALIDANDO
+        ValidarResultados(resultados, cantidadEsperada);
+    }
+
+    // Validando la cantidad de lineas respectivas al bloque
+
+    static int ContarLineasValidas(string ruta)
+    {
+        int contador = 0;
+        using (var lector = new StreamReader(ruta))
+        {
+            lector.ReadLine(); 
+            while (!lector.EndOfStream)
+            {
+                var linea = lector.ReadLine();
+                if (!string.IsNullOrWhiteSpace(linea))
+                {
+                    contador++;
+                }
+            }
+        }
+        return contador;
+    }
+
+
+    // Validando los resultados
+    static void ValidarResultados(List<ResultadoSimulacion> resultados, int esperados)
+    {
+        Console.WriteLine("VALIDACIÓN DE PRUEBAS:");
+
+        if (resultados.Count == esperados)
+        {
+            Console.WriteLine("Cantidad de resultados esperada");
+        }
+        else
+        {
+            Console.WriteLine($"Ha ocurrido un error!: Se esperaban {esperados}, pero se obtuvieron {resultados.Count}");
+        }
+
+        int errores = resultados.Count(r => r.Pais == null || r.PIBAjustado <= 0);
+        if (errores == 0)
+        {
+            Console.WriteLine("Todos los resultados son válidos");
+        }
+        else
+        {
+            Console.WriteLine($"Hay {errores} resultados inválidos");
+        }
     }
 }
